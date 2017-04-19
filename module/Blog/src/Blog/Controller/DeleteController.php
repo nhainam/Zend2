@@ -1,0 +1,43 @@
+<?php
+// Filename: /module/Blog/src/Blog/Controller/DeleteController.php
+namespace Blog\Controller;
+
+use Blog\Service\PostServiceInterface;
+use Zend\Mvc\Controller\AbstractActionController;
+
+class DeleteController extends AbstractActionController
+{
+    /**
+     * @var \Blog\Service\PostServiceInterface
+     */
+    protected $postService;
+
+    /**
+     * Delete constructor.
+     * @param PostServiceInterface $postService
+     */
+    public function __construct(PostServiceInterface $postService)
+    {
+        $this->postService = $postService;
+    }
+
+    public function indexAction()
+    {
+        try {
+            $post = $this->postService->findPost($this->params('id'));
+        } catch (\Exception $ex) {
+            return $this->redirect()->toRoute('blog');
+        }
+
+        $request = $this->getRequest();
+        if ($request->isPost()) {
+            $del = $request->getPost('delete_confirmation', 'no');
+            if ($del == 'yes') {
+                $this->postService->deletePost($post);
+            }
+            return $this->redirect()->toRoute('blog');
+        }
+
+        return ['post' => $post];
+    }
+}
